@@ -14,6 +14,8 @@ Dillo is a TypeScript backend framework for Cloudflare Workers. Your API is priv
 
 Scaffolding gives you a typed project with local dev. `npm run check` validates your application before it ships.
 
+The CLI prints a random armadillo every time you run it. Zero dependencies.
+
 ## Status
 
 Alpha. Pin the `alpha` tag until the 1.0 release lands.
