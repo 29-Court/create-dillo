@@ -1,0 +1,1 @@
+{"bin":{"create-dillo":"./bin/create-dillo.js"},"description":"Create a dillo app in one command. Zero dependencies.","engines":{"node":">=18"},"files":["bin/"],"license":"MIT","name":"create-dillo","version":"1.0.0"}
