@@ -4,78 +4,164 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>dillo — the backend that's hard to kill</title>
-<meta name="description" content="Dillo is a TypeScript backend framework for Cloudflare Workers. Private by default, armored by design.">
+<meta name="description" content="Dillo is a TypeScript backend framework for Cloudflare Workers. Private by default, armored by design. Alpha.">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --bg: #0b0e13; --panel: #131720; --line: #232a38; --txt: #e8edf4; --mut: #8b94a3; --gold: #f0b429; --teal: #3ec6b8; }
   body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
-  .hero { position: relative; text-align: center; padding: 72px 24px 48px; overflow: hidden; }
-  .hero svg.bg-waves { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; opacity: 0.25; pointer-events: none; }
-  .dillo-mark { width: 120px; height: 120px; margin: 0 auto 24px; }
-  h1 { font-size: clamp(2.5rem, 6vw, 4rem); letter-spacing: -0.03em; font-weight: 800; }
-  h1 .dot { color: var(--gold); }
-  .tag { font-size: 1.3rem; color: var(--mut); margin: 12px 0 32px; }
-  .snip { display: inline-block; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 28px; font-size: 1rem; margin-bottom: 16px; }
-  .snip code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--teal); }
-  .snip .c { color: #6e7681; }
-  .links { margin-top: 24px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-  .links a { color: #58a6ff; text-decoration: none; font-weight: 600; }
-  .links a:hover { text-decoration: underline; }
-  .grid { max-width: 900px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
-  .card h3 { font-size: 1.05rem; margin-bottom: 8px; color: var(--gold); }
-  .card p { color: var(--mut); font-size: 0.95rem; }
-  .card svg { width: 36px; height: 36px; margin-bottom: 12px; }
-  .status { text-align: center; padding: 24px; color: var(--mut); }
-  .status strong { color: var(--txt); }
-  footer { text-align: center; padding: 32px 24px 48px; color: #5a6270; font-size: 0.85rem; border-top: 1px solid var(--line); margin-top: 24px; }
-  footer a { color: #58a6ff; text-decoration: none; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 96px 24px 64px; position: relative; }
+  .hero .mark { font-size: 64px; margin-bottom: 16px; }
+  .hero h1 { font-size: 72px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .hero h1 .dot { color: var(--gold); }
+  .hero .tag { font-size: 22px; color: var(--mut); margin-top: 16px; font-weight: 400; }
+  .hero .tag b { color: var(--txt); font-weight: 600; }
+
+  /* Install */
+  .install { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 32px; margin: 32px auto; max-width: 640px; text-align: center; }
+  .install code { display: block; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 18px; background: #0b0e13; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; margin: 16px 0; color: var(--teal); overflow-x: auto; white-space: nowrap; }
+  .install .alpha { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); border-radius: 20px; padding: 4px 14px; margin-top: 8px; }
+
+  /* Sheriff quote — the centerpiece */
+  .sheriff { padding: 96px 24px; text-align: center; position: relative; }
+  .sheriff .label { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; }
+  .sheriff blockquote { font-size: 42px; font-weight: 800; letter-spacing: -1px; line-height: 1.2; max-width: 640px; margin: 0 auto; }
+  .sheriff blockquote .q { color: var(--gold); }
+  .sheriff cite { display: block; margin-top: 24px; font-style: normal; font-size: 15px; color: var(--mut); }
+  .sheriff cite b { color: var(--txt); }
+
+  /* Stories */
+  .stories { padding: 64px 24px; }
+  .stories h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; text-align: center; margin-bottom: 48px; }
+  .story { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+  .story .where { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+  .story p { font-size: 17px; color: var(--txt); margin-bottom: 12px; }
+  .story p:last-child { margin-bottom: 0; color: var(--mut); font-size: 15px; }
+  .story .punch { font-size: 20px; font-weight: 700; color: var(--gold); }
+
+  /* Product */
+  .product { padding: 64px 24px; text-align: center; }
+  .product h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; }
+  .product .lede { font-size: 18px; color: var(--mut); max-width: 560px; margin: 0 auto 48px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 720px; margin: 0 auto; text-align: left; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .card .icon { font-size: 28px; margin-bottom: 12px; }
+  .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: var(--mut); }
+
+  /* Examples */
+  .examples { padding: 64px 24px; text-align: center; }
+  .examples h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; }
+  .examples p { font-size: 17px; color: var(--mut); margin-bottom: 32px; }
+  .btn { display: inline-block; background: var(--gold); color: #0b0e13; font-weight: 700; font-size: 17px; padding: 16px 40px; border-radius: 12px; text-decoration: none; transition: transform 0.12s; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.ghost { background: transparent; color: var(--txt); border: 1px solid var(--line); margin-left: 12px; }
+
+  /* Footer */
+  footer { padding: 64px 24px 48px; text-align: center; border-top: 1px solid var(--line); margin-top: 32px; }
+  footer .links { margin-bottom: 16px; }
+  footer a { color: var(--mut); text-decoration: none; margin: 0 12px; font-size: 14px; }
+  footer a:hover { color: var(--txt); }
+  footer .fine { font-size: 13px; color: #5f6368; margin-top: 16px; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 52px; }
+    .sheriff blockquote { font-size: 30px; }
+    .install code { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
-  <div class="hero">
-    <div class="dillo-mark">
-      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="60" cy="72" rx="42" ry="30" fill="#2a3242" stroke="#f0b429" stroke-width="3"/>
-        <path d="M22 72 Q30 48 60 46 Q90 48 98 72" stroke="#f0b429" stroke-width="2.5" fill="none"/>
-        <path d="M30 62 Q60 54 90 62" stroke="#3ec6b8" stroke-width="2" fill="none" opacity="0.7"/>
-        <circle cx="92" cy="66" r="6" fill="#2a3242" stroke="#f0b429" stroke-width="2.5"/>
-        <circle cx="94" cy="64" r="1.8" fill="#e8edf4"/>
-        <path d="M28 88 L22 100 M40 92 L36 104 M80 92 L84 104 M92 88 L98 100" stroke="#8b94a3" stroke-width="3" stroke-linecap="round"/>
-        <path d="M60 42 L60 30 M60 30 L54 36 M60 30 L66 36" stroke="#f0b429" stroke-width="2.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <h1>dillo<span class="dot">.</span></h1>
-    <div class="tag">The backend that's hard to kill.</div>
-    <div class="snip"><code><span class="c"># one command. zero dependencies.</span><br>npx create-dillo@alpha my-app<br>cd my-app<br>npm run dev</code></div>
-    <div class="links">
-      <a href="https://www.npmjs.com/package/create-dillo">npm</a>
-      <a href="https://github.com/29-Court/create-dillo">GitHub</a>
-      <a href="https://hackthedillo.dev">hackthedillo.dev</a>
-    </div>
-    <svg class="bg-waves" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="M0,64 C240,110 480,20 720,64 C960,110 1200,20 1440,64 L1440,120 L0,120 Z" fill="#3ec6b8"/></svg>
+
+<div class="hero">
+  <div class="mark">🛡️</div>
+  <h1>dillo<span class="dot">.</span></h1>
+  <p class="tag">The backend that's <b>hard to kill.</b></p>
+</div>
+
+<div class="wrap">
+  <div class="install">
+    <code>npx create-dillo@alpha my-app</code>
+    <span class="alpha">Alpha</span>
   </div>
+</div>
 
-  <div class="grid">
-    <div class="card">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#f0b429" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      <h3>Private by default</h3>
-      <p>Your API is private. You declare exactly what is public, and auth fails closed. No accidental exposure.</p>
+<div class="sheriff">
+  <div class="wrap">
+    <div class="label">Cass County, Texas — 2015</div>
+    <blockquote><span class="q">&ldquo;</span>We didn&rsquo;t find the armadillo.<span class="q">&rdquo;</span></blockquote>
+    <cite><b>Sheriff Larry Rowe</b>, after a man fired three .38 rounds at an armadillo.<br>One bullet ricocheted off the shell and hit the shooter in the jaw.</cite>
+  </div>
+</div>
+
+<div class="stories">
+  <div class="wrap">
+    <h2>The dillo is always fine.</h2>
+
+    <div class="story">
+      <div class="where">Marietta, Texas — 2015</div>
+      <p>A man went outside at 3 a.m. with a .38 revolver and fired three times at an armadillo on his property.</p>
+      <p>At least one bullet ricocheted off the animal&rsquo;s hard shell and struck the man in the jaw. He was airlifted to a hospital.</p>
+      <p class="punch">The armadillo was never found.</p>
     </div>
-    <div class="card">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#3ec6b8" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-      <h3>Cloudflare Workers</h3>
-      <p>TypeScript backend on the edge. Scaffolding gives you a typed project with local dev built in.</p>
+
+    <div class="story">
+      <div class="where">Lee County, Georgia — 2015</div>
+      <p>A man fired a 9mm at an armadillo. The bullet ricocheted, went through a fence, through the back door of a mobile home, through a recliner &mdash; and struck his mother-in-law.</p>
+      <p class="punch">Shoot at the shell. The shell wins.</p>
     </div>
-    <div class="card">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#f0b429" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
-      <h3>Ships validated</h3>
-      <p><code>npm run check</code> validates your application before it ships. Catch it local, not in prod.</p>
+
+    <div class="story">
+      <div class="where">The pattern</div>
+      <p>In every incident, the shooter ends up hurt and the armadillo walks away. The story was so good that in 2017, news outlets reported the 2015 incident as breaking news &mdash; twice.</p>
+      <p class="punch">Attack the dillo. The dillo doesn&rsquo;t break. You do.</p>
     </div>
   </div>
+</div>
 
-  <div class="status"><strong>Status:</strong> Alpha — pin the <code>alpha</code> tag until 1.0 lands.</div>
+<div class="product">
+  <div class="wrap">
+    <h2>Now the backend version.</h2>
+    <p class="lede">Dillo is a TypeScript backend framework for Cloudflare Workers. Users, auth, database, files, permissions, functions, agents &mdash; one install. Private by default, armored by design.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">🔒</div>
+        <h3>Private by default</h3>
+        <p>Nothing is public unless you say so. Auth and isolation hold under adversarial testing.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚡</div>
+        <h3>Cloudflare Workers</h3>
+        <p>Runs at the edge. Zero config deploy. Your backend lives where your users are.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✅</div>
+        <h3>Ships validated</h3>
+        <p>Every release passes verification before it ships. No broken builds, no surprises.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <footer>Built by <a href="https://29court.com">29 Court Consulting</a> · dillo.js.org</footer>
+<div class="examples">
+  <div class="wrap">
+    <h2>See it running.</h2>
+    <p>Fifteen live example apps on real backends &mdash; guestbooks, repair shops, concierges, and more.</p>
+    <a class="btn" href="https://dillo.29court.com/">Browse examples</a>
+    <a class="btn ghost" href="https://github.com/29-Court/create-dillo">GitHub</a>
+  </div>
+</div>
+
+<footer>
+  <div class="links">
+    <a href="https://www.npmjs.com/package/create-dillo">npm</a>
+    <a href="https://github.com/29-Court/create-dillo">GitHub</a>
+    <a href="https://dillo.29court.com/">Examples</a>
+  </div>
+  <p class="fine">Dillo alpha. The stories above are real &mdash; Reuters, 2015. The backend is new.</p>
+</footer>
+
 </body>
 </html>
