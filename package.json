@@ -1,1 +1,149 @@
-{"bin":{"create-dillo":"./bin/create-dillo.js"},"description":"Create a dillo app in one command. Zero dependencies.","engines":{"node":">=18"},"files":["bin/"],"license":"MIT","name":"create-dillo","version":"1.0.0"}
+{
+  "name": "create-dillo",
+  "version": "1.0.0-alpha.0",
+  "description": "Dillo \u2014 the edge-native typed backend. Create and check standalone Dillo applications.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "dist-cli",
+    "templates",
+    "migrations",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "create-dillo": "dist-cli/bin/run.js",
+    "dillo": "dist-cli/bin/run.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./backend": {
+      "types": "./dist/backend.d.ts",
+      "import": "./dist/backend.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js"
+    },
+    "./ui/first-party": {
+      "types": "./dist/ui/first-party.d.ts",
+      "import": "./dist/ui/first-party.js"
+    },
+    "./extensions": {
+      "types": "./dist/extensions.d.ts",
+      "import": "./dist/extensions.js"
+    },
+    "./client-script": "./dist/client.bundle.js",
+    "./cloudflare": {
+      "types": "./dist/cloudflare/index.d.ts",
+      "import": "./dist/cloudflare/index.js"
+    },
+    "./local": {
+      "types": "./dist/local/index.d.ts",
+      "import": "./dist/local/index.js"
+    },
+    "./deploy/cloudflare": {
+      "types": "./dist/deploy/cloudflare.d.ts",
+      "import": "./dist/deploy/cloudflare.js"
+    },
+    "./package.json": "./package.json",
+    "./migrations": {
+      "types": "./dist/migrations.d.ts",
+      "import": "./dist/migrations.js"
+    },
+    "./versions": {
+      "types": "./dist/versions.d.ts",
+      "import": "./dist/versions.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
+    }
+  },
+  "oclif": {
+    "bin": "create-dillo",
+    "dirname": "create-dillo",
+    "commands": "./dist-cli/commands"
+  },
+  "dilloCompatibility": ">=1.0.0 <2.0.0",
+  "dilloDeploymentDependencies": {
+    "alchemy": "2.0.0-beta.74",
+    "effect": "4.0.0-rc.112",
+    "esbuild": "^0.28.1"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "type-check": "tsc --noEmit && tsc -p tsconfig.tools.json && tsc -p tsconfig.cli.json",
+    "test": "npm run build && npm run build:cli && node --test \"tests/**/*.test.mjs\" \"tests/**/*.test.ts\"",
+    "test:all": "npm run build && npm run build:cli && npm run type-check && node scripts/verify-report-citations.mjs && node --test \"tests/**/*.test.mjs\" \"tests/**/*.test.ts\"",
+    "verify:report": "node scripts/verify-report-citations.mjs",
+    "release:verify": "node scripts/verify-release.ts",
+    "prepack": "npm run build && npm run build:cli",
+    "dev": "npm run build && npm --prefix examples/00-guestbook install --no-audit --no-fund --loglevel=error && npm --prefix examples/00-guestbook run dev",
+    "migrations:generate": "node scripts/migrations.ts",
+    "permission-lab": "npm run build && node scripts/permission-lab.mjs",
+    "permission-evals": "npm run build && node scripts/permission-evals.mjs",
+    "llms:generate": "npm run build && node scripts/generate-llms.ts",
+    "llms:check": "npm run llms:generate && git diff --exit-code -- llms.txt",
+    "build:cli": "node scripts/build-cli.ts"
+  },
+  "dependencies": {
+    "effect": "4.0.0-rc.112",
+    "@oclif/core": "5.0.0",
+    "semver": "7.7.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260908.1",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "@types/node": "^24.0.0",
+    "alchemy": "2.0.0-beta.74",
+    "esbuild": "^0.28.1",
+    "miniflare": "5.20260921.0-alpha",
+    "typescript": "~6.0.3",
+    "@types/semver": "^7.8.0"
+  },
+  "engines": {
+    "node": ">=22.19",
+    "npm": ">=11.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/29-Court/create-dillo.git"
+  },
+  "homepage": "https://github.com/29-Court/create-dillo#readme",
+  "bugs": "https://github.com/29-Court/create-dillo/issues",
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
+  },
+  "overrides": {
+    "@hono/node-server": "1.19.15",
+    "hono": "4.13.5",
+    "lodash": "4.18.1",
+    "valibot": "1.4.2",
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@effect/sql-d1": "4.0.0-rc.112",
+    "@effect/sql-sqlite-do": "4.0.0-rc.112",
+    "@effect/vitest": "4.0.0-rc.112"
+  }
+}
