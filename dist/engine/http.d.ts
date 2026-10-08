@@ -1,0 +1,35 @@
+import { type ArmadilloEnv } from "./environment.js";
+import { ArmadilloFunctionError } from "../backend.js";
+import { type ErrorCode } from "./environment.js";
+export declare function sourceFingerprint(value: string): string;
+export declare const DEFAULT_PASSWORD_ITERATIONS = 100000;
+export declare const MAX_PASSWORD_ITERATIONS = 100000;
+export declare const MIN_PASSWORD_ITERATIONS = 10000;
+export declare const DEFAULT_SESSION_LIFETIME_MS: number;
+export declare const DEFAULT_MAGIC_LINK_LIFETIME_MS: number;
+export declare const DEFAULT_MAX_JSON_BYTES: number;
+export declare const DEFAULT_MAX_FILE_BYTES: number;
+export declare const DIRECT_UPLOAD_LIMIT_BYTES: number;
+export declare const NAME: RegExp;
+export declare const FIELD: RegExp;
+export { ROLE } from "../access.js";
+export declare const EVENT_TYPE: RegExp;
+export declare const RESERVED_FIELDS: Set<string>;
+export declare const encoder: TextEncoder;
+export declare function configuredInteger(value: string | undefined, fallback: number, minimum: number, maximum: number): number;
+export declare function passwordIterations(env: ArmadilloEnv): number;
+export declare function sessionLifetimeMs(env: ArmadilloEnv): number;
+export declare function magicLinkLifetimeMs(env: ArmadilloEnv): number;
+export declare function maxJsonBytes(env: ArmadilloEnv): number;
+export declare function maxFileBytes(env: ArmadilloEnv): number;
+export declare class HttpError extends ArmadilloFunctionError {
+    constructor(status: number, code: ErrorCode, message: string, fields?: Record<string, string>, hint?: string);
+}
+export declare function json(data: unknown, status?: number): Response;
+export declare function allowedOrigin(request: Request, env: ArmadilloEnv): string | null;
+export declare function assertOrigin(request: Request, env: ArmadilloEnv): void;
+export declare function finish(response: Response, request: Request, env: ArmadilloEnv, requestId: string): Response;
+export declare function clientConfigSource(request: Request, env: ArmadilloEnv, source: string): string;
+export declare function clientEtag(kind: "module" | "script", source: string, env: ArmadilloEnv): string;
+export declare function preflight(request: Request, env: ArmadilloEnv): Response;
+export declare function errorResponse(error: unknown, requestId: string): Response;

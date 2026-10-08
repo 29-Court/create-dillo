@@ -1,0 +1,10 @@
+import { type ArmadilloCollectorDefinition } from "../backend.js";
+import { type SchemaDefinition } from "../index.js";
+import { type InternalCollectorSubmissionRow } from "../backend.js";
+import { type JsonObject } from "../backend.js";
+import { type ArmadilloEnv } from "./environment.js";
+import { type ArmadilloBackendDefinition } from "../backend.js";
+export declare function collectorSchema(definition: ArmadilloCollectorDefinition): SchemaDefinition;
+export declare function collectorSubmissionJson(row: InternalCollectorSubmissionRow): JsonObject;
+export declare function boundedRetentionDays(value: number | undefined): number;
+export declare function collectorsRoute(request: Request, env: ArmadilloEnv, currentAppId: string, id: string, definition: ArmadilloCollectorDefinition | undefined, backend: ArmadilloBackendDefinition, action?: string): Promise<Response>;

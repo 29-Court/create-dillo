@@ -1,0 +1,21 @@
+{
+  "0001_base.sql": "2f0b3ee96403fb522c8bbee9c5db4b9c712e43fdd126e37f23ec323d43b2b87b",
+  "0002_groups_events.sql": "0b455f157904c9f6a21e68be676d177fe6367d256ba111dfe30243a62b264c60",
+  "0003_schema_state.sql": "7d3117d2170a1fbfbde500f1cf626ff18c7143eccf78e41edb1c29702502b143",
+  "0004_pre_publish_primitives.sql": "8ea9869b63041c831f396be27a9da38392b8664c156745bb1717117ef6d1cf7d",
+  "0005_physical_schema_files.sql": "a96dd61057ec13c49c0ea5b6814e2bf47f10df9c10636a322e890e986ff46be0",
+  "0006_collectors.sql": "dbf1fb2c1d1cd34f1bf3ac48f777a72ab201ceae3e78d2d15ce3c28fa098ad16",
+  "0007_realtime_webhooks.sql": "68d113421de9f9f1787575fb39b25892c934619cca8618aa61c38e8c8a720423",
+  "0008_api_key_lifecycle.sql": "aeb27fdeb193c8791ba3f6c1ec190097cdac27b21b04a84983f4379190af37a1",
+  "0009_api_key_audit.sql": "1fd043b11858572fe63cdb931b37607d4984ce414bd7d9b8317ba0de51e12701",
+  "0010_gdpr.sql": "b13fbc20a445b652b7f5ffb3c9a43027b808eabb36d2848a13ef2e00d5659072",
+  "0011_group_projection.sql": "3989d4de9f1dd14b79664eb30b30977624bb64ba5305e7c4f00471ab44a86335",
+  "0012_burrow.sql": "bc0044905ecdfbd4e6517357f425960f5943ccf709f3443bd55c70a842795a6e",
+  "0013_profile_photo.sql": "24f092de65e3d3cdc4d70bad634994c6bac4ce87b2ce61aff25e608a2b409187",
+  "0014_record_audit.sql": "e797db59d001e49d68330aa4871e4e206d80bae1973a922050ce2cb149ee74ad",
+  "0015_user_profile.sql": "ce6cc04254adfd539e314319c98bb0080b3cd3a5b7b61edd8605d42167b657da",
+  "0016_ticket_tokens.sql": "47122dea762bfa62dafeeb5e71fb6be9f87b00705930aad6b1e04b582ef998a9",
+  "0017_bridge.sql": "5589ee5d06bbf30deacc8713237dfa5c89cb2ae4bf5570483a25f3b550baaf1c",
+  "0018_usage_metering.sql": "994de3492fa510eacd91bebdc85112b4ff574f04c0dea0e977d94d5970c29b86",
+  "0019_scheduled_functions.sql": "8a26003a367847297e05064fdb3e30eab581cfcd059fa4437ca4c1e902cac5c9"
+}

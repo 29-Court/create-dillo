@@ -1,0 +1,39 @@
+{
+  "name": "dillo-typed-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit && tsx check.ts",
+    "dev": "alchemy dev",
+    "plan": "alchemy plan",
+    "deploy": "alchemy deploy",
+    "destroy": "alchemy destroy"
+  },
+  "dependencies": {
+    "create-dillo": "^1.0.0"
+  },
+  "devDependencies": {
+    "alchemy": "2.0.0-beta.74",
+    "effect": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "esbuild": "^0.28.1",
+    "tsx": "^4.20.5",
+    "typescript": "~6.0.3",
+    "@types/node": "^24.0.0",
+    "@cloudflare/workers-types": "5.20260908.1"
+  },
+  "engines": {
+    "node": ">=22.19",
+    "npm": ">=11.6"
+  },
+  "overrides": {
+    "@hono/node-server": "1.19.15",
+    "hono": "4.13.5",
+    "lodash": "4.18.1",
+    "valibot": "1.4.2",
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@effect/sql-d1": "4.0.0-rc.112",
+    "@effect/sql-sqlite-do": "4.0.0-rc.112",
+    "@effect/vitest": "4.0.0-rc.112"
+  }
+}

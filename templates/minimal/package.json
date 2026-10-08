@@ -1,0 +1,43 @@
+{
+  "name": "dillo-minimal-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit && node --experimental-strip-types check.ts && node --experimental-strip-types --test test.ts initialization.test.ts",
+    "dev": "node --experimental-strip-types local.ts",
+    "plan": "alchemy plan",
+    "deploy": "alchemy deploy",
+    "destroy": "alchemy destroy",
+    "dev:local": "node --experimental-strip-types local.ts",
+    "build:ui": "node --experimental-strip-types build.ts",
+    "preplan": "npm run build:ui",
+    "predeploy": "npm run build:ui"
+  },
+  "dependencies": {
+    "create-dillo": "^1.0.0"
+  },
+  "devDependencies": {
+    "alchemy": "2.0.0-beta.74",
+    "effect": "4.0.0-rc.112",
+    "@effect/platform-node": "4.0.0-rc.112",
+    "esbuild": "^0.28.1",
+    "tsx": "^4.20.5",
+    "typescript": "~6.0.3",
+    "@types/node": "^24.0.0",
+    "@cloudflare/workers-types": "5.20260908.1"
+  },
+  "engines": {
+    "node": ">=22.19",
+    "npm": ">=11.6"
+  },
+  "overrides": {
+    "@hono/node-server": "1.19.15",
+    "hono": "4.13.5",
+    "lodash": "4.18.1",
+    "valibot": "1.4.2",
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@effect/sql-d1": "4.0.0-rc.112",
+    "@effect/sql-sqlite-do": "4.0.0-rc.112",
+    "@effect/vitest": "4.0.0-rc.112"
+  }
+}
