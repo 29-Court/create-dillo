@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dillo — the backend that's hard to kill</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
+  h1 { font-size: 3rem; letter-spacing: -0.02em; margin-bottom: 8px; }
+  h1 .dot { color: #f0b429; }
+  .tag { font-size: 1.25rem; color: #8b949e; margin-bottom: 32px; }
+  pre { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 24px 0; font-size: 0.95rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  p { margin: 16px 0; color: #c9d1d9; }
+  a { color: #58a6ff; }
+  .badges { margin: 24px 0; }
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #21262d; color: #6e7681; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>dillo<span class="dot">.</span></h1>
+  <div class="tag">The backend that's hard to kill.</div>
+  <p>Dillo is a TypeScript backend framework for Cloudflare Workers. Your API is private by default. You declare exactly what is public, and auth fails closed.</p>
+  <pre><code>npx create-dillo@alpha my-app
+cd my-app
+npm run dev</code></pre>
+  <p>Scaffolding gives you a typed project with local dev. <code>npm run check</code> validates your application before it ships.</p>
+  <p>The CLI prints a random armadillo every time you run it. Zero dependencies.</p>
+  <div class="badges">
+    <p><a href="https://www.npmjs.com/package/create-dillo">npm: create-dillo</a> &nbsp;·&nbsp; <a href="https://github.com/29-Court/create-dillo">GitHub: 29-Court/create-dillo</a></p>
+  </div>
+  <p><strong>Status:</strong> Alpha. Pin the <code>alpha</code> tag until the 1.0 release lands.</p>
+  <footer>Built by 29 Court Consulting · dillo.js.org</footer>
+</div>
+</body>
+</html>
