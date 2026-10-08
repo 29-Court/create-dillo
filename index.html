@@ -4,36 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>dillo — the backend that's hard to kill</title>
+<meta name="description" content="Dillo is a TypeScript backend framework for Cloudflare Workers. Private by default, armored by design.">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
-  h1 { font-size: 3rem; letter-spacing: -0.02em; margin-bottom: 8px; }
-  h1 .dot { color: #f0b429; }
-  .tag { font-size: 1.25rem; color: #8b949e; margin-bottom: 32px; }
-  pre { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 24px 0; font-size: 0.95rem; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  p { margin: 16px 0; color: #c9d1d9; }
-  a { color: #58a6ff; }
-  .badges { margin: 24px 0; }
-  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #21262d; color: #6e7681; font-size: 0.85rem; }
+  :root { --bg: #0b0e13; --panel: #131720; --line: #232a38; --txt: #e8edf4; --mut: #8b94a3; --gold: #f0b429; --teal: #3ec6b8; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; background: var(--bg); color: var(--txt); line-height: 1.6; overflow-x: hidden; }
+  .hero { position: relative; text-align: center; padding: 72px 24px 48px; overflow: hidden; }
+  .hero svg.bg-waves { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; opacity: 0.25; pointer-events: none; }
+  .dillo-mark { width: 120px; height: 120px; margin: 0 auto 24px; }
+  h1 { font-size: clamp(2.5rem, 6vw, 4rem); letter-spacing: -0.03em; font-weight: 800; }
+  h1 .dot { color: var(--gold); }
+  .tag { font-size: 1.3rem; color: var(--mut); margin: 12px 0 32px; }
+  .snip { display: inline-block; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 28px; font-size: 1rem; margin-bottom: 16px; }
+  .snip code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--teal); }
+  .snip .c { color: #6e7681; }
+  .links { margin-top: 24px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+  .links a { color: #58a6ff; text-decoration: none; font-weight: 600; }
+  .links a:hover { text-decoration: underline; }
+  .grid { max-width: 900px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+  .card h3 { font-size: 1.05rem; margin-bottom: 8px; color: var(--gold); }
+  .card p { color: var(--mut); font-size: 0.95rem; }
+  .card svg { width: 36px; height: 36px; margin-bottom: 12px; }
+  .status { text-align: center; padding: 24px; color: var(--mut); }
+  .status strong { color: var(--txt); }
+  footer { text-align: center; padding: 32px 24px 48px; color: #5a6270; font-size: 0.85rem; border-top: 1px solid var(--line); margin-top: 24px; }
+  footer a { color: #58a6ff; text-decoration: none; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>dillo<span class="dot">.</span></h1>
-  <div class="tag">The backend that's hard to kill.</div>
-  <p>Dillo is a TypeScript backend framework for Cloudflare Workers. Your API is private by default. You declare exactly what is public, and auth fails closed.</p>
-  <pre><code>npx create-dillo@alpha my-app
-cd my-app
-npm run dev</code></pre>
-  <p>Scaffolding gives you a typed project with local dev. <code>npm run check</code> validates your application before it ships.</p>
-  <p>The CLI prints a random armadillo every time you run it. Zero dependencies.</p>
-  <div class="badges">
-    <p><a href="https://www.npmjs.com/package/create-dillo">npm: create-dillo</a> &nbsp;·&nbsp; <a href="https://github.com/29-Court/create-dillo">GitHub: 29-Court/create-dillo</a></p>
+  <div class="hero">
+    <div class="dillo-mark">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="60" cy="72" rx="42" ry="30" fill="#2a3242" stroke="#f0b429" stroke-width="3"/>
+        <path d="M22 72 Q30 48 60 46 Q90 48 98 72" stroke="#f0b429" stroke-width="2.5" fill="none"/>
+        <path d="M30 62 Q60 54 90 62" stroke="#3ec6b8" stroke-width="2" fill="none" opacity="0.7"/>
+        <circle cx="92" cy="66" r="6" fill="#2a3242" stroke="#f0b429" stroke-width="2.5"/>
+        <circle cx="94" cy="64" r="1.8" fill="#e8edf4"/>
+        <path d="M28 88 L22 100 M40 92 L36 104 M80 92 L84 104 M92 88 L98 100" stroke="#8b94a3" stroke-width="3" stroke-linecap="round"/>
+        <path d="M60 42 L60 30 M60 30 L54 36 M60 30 L66 36" stroke="#f0b429" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1>dillo<span class="dot">.</span></h1>
+    <div class="tag">The backend that's hard to kill.</div>
+    <div class="snip"><code><span class="c"># one command. zero dependencies.</span><br>npx create-dillo@alpha my-app<br>cd my-app<br>npm run dev</code></div>
+    <div class="links">
+      <a href="https://www.npmjs.com/package/create-dillo">npm</a>
+      <a href="https://github.com/29-Court/create-dillo">GitHub</a>
+      <a href="https://hackthedillo.dev">hackthedillo.dev</a>
+    </div>
+    <svg class="bg-waves" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="M0,64 C240,110 480,20 720,64 C960,110 1200,20 1440,64 L1440,120 L0,120 Z" fill="#3ec6b8"/></svg>
   </div>
-  <p><strong>Status:</strong> Alpha. Pin the <code>alpha</code> tag until the 1.0 release lands.</p>
-  <footer>Built by 29 Court Consulting · dillo.js.org</footer>
-</div>
+
+  <div class="grid">
+    <div class="card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f0b429" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <h3>Private by default</h3>
+      <p>Your API is private. You declare exactly what is public, and auth fails closed. No accidental exposure.</p>
+    </div>
+    <div class="card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3ec6b8" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      <h3>Cloudflare Workers</h3>
+      <p>TypeScript backend on the edge. Scaffolding gives you a typed project with local dev built in.</p>
+    </div>
+    <div class="card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f0b429" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+      <h3>Ships validated</h3>
+      <p><code>npm run check</code> validates your application before it ships. Catch it local, not in prod.</p>
+    </div>
+  </div>
+
+  <div class="status"><strong>Status:</strong> Alpha — pin the <code>alpha</code> tag until 1.0 lands.</div>
+
+  <footer>Built by <a href="https://29court.com">29 Court Consulting</a> · dillo.js.org</footer>
 </body>
 </html>
