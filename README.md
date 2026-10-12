@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://muse.ai/files/715482231644541/1784268249514476/fyswfdddsor42jl304g6wc7g/21a168bb2f9ce0ebf92a81742edd9a239e1380381606aa8440ea6436e5fbb401.png" alt="Armadillo — Armored backend." width="400">
+  <img src="https://raw.githubusercontent.com/29-Court/create-dillo/main/site/img/shell.webp" alt="Armadillo — Armored backend." width="400">
 </p>
 
 <h1 align="center">DILLO</h1>
