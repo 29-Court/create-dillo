@@ -1,475 +1,281 @@
-import type { ArmadilloBackendDefinition, ArmadilloFunctionContext, ArmadilloFunctionDefinition, JsonObject, JsonValue } from "../backend.js";
-import { ArmadilloFunctionError, validateFunctionInput, validateFunctionOutput } from "../backend.js";
-import { INTERNAL_TABLES } from "../backend.js";
-import type { ArmadilloEnv } from "./environment.js";
-import { makeId } from "./helpers/id.js";
-import { now } from "./records.js";
-import { trustedGroups, trustedRecords, readTrustedFile } from "./trusted-records.js";
-import {
-  nextCronUtc,
-  parseCron,
-  sanitizeScheduleError,
-  scheduleRetryDelay,
-  type ScheduleDefinition,
-} from "../schedules.js";
-import { membershipsFor } from "./teams.js";
+/** User-declared schedules: cron + principal + bounded authority. */
 
-const MAX_STARTS_PER_SWEEP = 10;
-const LEASE_GRACE_MS = 5_000;
+export type SchedulePrincipal =
+  | { readonly type: "system" }
+  | { readonly type: "owner" };
 
-type ScheduleStateRow = {
-  schedule_name: string;
-  paused: number;
-  next_due_at: string | null;
-  running_at: string | null;
-  running_run_id: string | null;
-  pending_attempt: number;
-  last_run_at: string | null;
+export type ScheduleRetryOptions = {
+  readonly attempts?: number;
+  readonly backoff?: "fixed" | "exponential";
+  readonly initialDelayMs?: number;
 };
 
-type OwnerRow = { user_id: string; email: string; name: string | null };
+export type ScheduleDefinition = {
+  /** Name of a function in `backend.functions`. */
+  readonly function: string;
+  /** Standard 5-field cron: minute hour day-of-month month day-of-week. */
+  readonly cron: string;
+  /** IANA timezone. Default UTC. Wall-clock matching; see DST policy in docs/operations.md. */
+  readonly timezone?: string;
+  /** Principal the run acts as. Never ambient god-mode. */
+  readonly principal: SchedulePrincipal;
+  /**
+   * Opt-in to invoke a function with `authority: "trusted"`.
+   * A trusted function without this flag is refused (no authority escalation).
+   */
+  readonly trusted?: boolean;
+  /** Overlap policy. Only `skip` (skip-while-running) is supported in Slice 1. */
+  readonly overlap?: "skip";
+  /** Hard run timeout in ms. Default 30_000; max 300_000. */
+  readonly timeoutMs?: number;
+  /** Retry before dead-letter. Default: one attempt (no retry). */
+  readonly retry?: ScheduleRetryOptions;
+  /** JSON data passed as function input. Must match the function input contract. */
+  readonly data?: Record<string, unknown>;
+};
 
-async function resolveOwner(env: ArmadilloEnv, appId: string): Promise<OwnerRow | null> {
-  // Burrow bootstrap owner lives on _armadillo_bootstrap.user_id.
-  const row = await env.DB.prepare(
-    `SELECT b.user_id AS user_id, u.email AS email, u.name AS name
-       FROM ${INTERNAL_TABLES.bootstrap} b
-       JOIN ${INTERNAL_TABLES.users} u
-         ON u.app_id = b.app_id AND u.id = b.user_id
-      WHERE b.app_id = ?1
-      LIMIT 1`,
-  ).bind(appId).first<OwnerRow>();
-  return row ?? null;
-}
+const NAME = /^[A-Za-z][A-Za-z0-9_-]{0,62}$/;
+const CRON_FIELD = /^(\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)$/;
 
-async function ensureState(
-  env: ArmadilloEnv,
-  appId: string,
-  name: string,
-  definition: ScheduleDefinition,
-  timestamp: string,
-): Promise<ScheduleStateRow> {
-  const existing = await env.DB.prepare(
-    `SELECT schedule_name, paused, next_due_at, running_at, running_run_id, pending_attempt, last_run_at
-       FROM ${INTERNAL_TABLES.scheduleState}
-      WHERE app_id = ?1 AND schedule_name = ?2`,
-  ).bind(appId, name).first<ScheduleStateRow>();
-  if (existing) return existing;
-  const cron = parseCron(definition.cron);
-  const timeZone = definition.timezone ?? "UTC";
-  const nextDue = nextCronUtc(Date.now(), cron, timeZone);
-  await env.DB.prepare(
-    `INSERT OR IGNORE INTO ${INTERNAL_TABLES.scheduleState}
-       (app_id, schedule_name, paused, next_due_at, running_at, running_run_id, pending_attempt, last_run_at, updated_at)
-     VALUES (?1, ?2, 0, ?3, NULL, NULL, 1, NULL, ?4)`,
-  ).bind(appId, name, nextDue, timestamp).run();
-  return (await env.DB.prepare(
-    `SELECT schedule_name, paused, next_due_at, running_at, running_run_id, pending_attempt, last_run_at
-       FROM ${INTERNAL_TABLES.scheduleState}
-      WHERE app_id = ?1 AND schedule_name = ?2`,
-  ).bind(appId, name).first<ScheduleStateRow>())!;
-}
-
-async function reapStaleLease(
-  env: ArmadilloEnv,
-  appId: string,
-  name: string,
-  state: ScheduleStateRow,
-  definition: ScheduleDefinition,
-  timestamp: string,
-): Promise<ScheduleStateRow> {
-  if (!state.running_at) return state;
-  const timeoutMs = (definition.timeoutMs ?? 30_000) + LEASE_GRACE_MS;
-  const started = Date.parse(state.running_at);
-  if (Number.isFinite(started) && Date.now() - started < timeoutMs) return state;
-  if (state.running_run_id) {
-    await env.DB.prepare(
-      `UPDATE ${INTERNAL_TABLES.scheduleRuns}
-          SET outcome = 'timeout', finished_at = ?1,
-              error_summary = COALESCE(error_summary, 'Run exceeded timeout; lease reaped.')
-        WHERE app_id = ?2 AND id = ?3 AND outcome = 'running'`,
-    ).bind(timestamp, appId, state.running_run_id).run();
+function parseCronField(raw: string, min: number, max: number, label: string): Set<number> {
+  if (!CRON_FIELD.test(raw)) {
+    throw new TypeError(`Cron ${label} \`${raw}\` is invalid. Use *, N, N-M, */N, or comma lists.`);
   }
-  // Only clear a lease this worker still owns. Without the `running_run_id`
-  // predicate, a late `finishRun` from a handler that overran its timeout would
-  // release the lease a *different* worker had already claimed, and the schedule
-  // would then run concurrently in several workers.
-  await env.DB.prepare(
-    `UPDATE ${INTERNAL_TABLES.scheduleState}
-        SET running_at = NULL, running_run_id = NULL, updated_at = ?1
-      WHERE app_id = ?2 AND schedule_name = ?3 AND running_run_id = ?4`,
-  ).bind(timestamp, appId, name, state.running_run_id).run();
-  return { ...state, running_at: null, running_run_id: null };
+  const values = new Set<number>();
+  for (const part of raw.split(",")) {
+    const [rangePart, stepPart] = part.split("/");
+    const step = stepPart === undefined ? 1 : Number(stepPart);
+    if (!Number.isSafeInteger(step) || step < 1) {
+      throw new TypeError(`Cron ${label} step in \`${raw}\` must be a positive integer.`);
+    }
+    let start: number;
+    let end: number;
+    if (rangePart === "*") {
+      start = min;
+      end = max;
+    } else if (rangePart!.includes("-")) {
+      const [a, b] = rangePart!.split("-").map(Number);
+      start = a!;
+      end = b!;
+    } else {
+      start = Number(rangePart);
+      end = start;
+    }
+    if (![start, end].every((n) => Number.isSafeInteger(n) && n >= min && n <= max) || start > end) {
+      throw new TypeError(`Cron ${label} \`${raw}\` is out of range ${min}-${max}.`);
+    }
+    for (let n = start; n <= end; n += step) values.add(n);
+  }
+  return values;
 }
 
-async function claimRun(
-  env: ArmadilloEnv,
-  appId: string,
-  name: string,
-  state: ScheduleStateRow,
-  principalType: string,
-  principalId: string,
-  timestamp: string,
-): Promise<string | null> {
-  const runId = makeId("srun");
-  const attempt = state.pending_attempt || 1;
-  // Optimistic claim: only if still not running and due.
-  const claimed = await env.DB.prepare(
-    `UPDATE ${INTERNAL_TABLES.scheduleState}
-        SET running_at = ?1, running_run_id = ?2, updated_at = ?1
-      WHERE app_id = ?3 AND schedule_name = ?4
-        AND paused = 0
-        AND running_at IS NULL
-        AND next_due_at IS NOT NULL
-        AND next_due_at <= ?1`,
-  ).bind(timestamp, runId, appId, name).run();
-  if ((claimed.meta?.changes ?? 0) < 1) return null;
-  await env.DB.prepare(
-    `INSERT INTO ${INTERNAL_TABLES.scheduleRuns}
-       (app_id, id, schedule_name, principal_type, principal_id, attempt, started_at, finished_at, outcome, error_summary, created_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, 'running', NULL, ?7)`,
-  ).bind(appId, runId, name, principalType, principalId, attempt, timestamp).run();
-  return runId;
-}
+export type ParsedCron = {
+  readonly minute: ReadonlySet<number>;
+  readonly hour: ReadonlySet<number>;
+  readonly dayOfMonth: ReadonlySet<number>;
+  readonly month: ReadonlySet<number>;
+  readonly dayOfWeek: ReadonlySet<number>;
+};
 
-function refusedAccess(): never {
-  throw new ArmadilloFunctionError(
-    403,
-    "FORBIDDEN",
-    "Scheduled runs use trusted records when trusted: true; caller-scoped records/files are not available on the schedule path.",
-  );
-}
-
-async function invokeScheduledFunction(
-  env: ArmadilloEnv,
-  appId: string,
-  backend: ArmadilloBackendDefinition,
-  scheduleName: string,
-  definition: ScheduleDefinition,
-  fn: ArmadilloFunctionDefinition,
-  principal: { type: "system" | "user"; id: string; name: string | null; email: string | null },
-): Promise<void> {
-  if (fn.authority === "trusted" && definition.trusted !== true) {
-    throw new ArmadilloFunctionError(
-      403,
-      "FORBIDDEN",
-      "Schedule must declare trusted: true to invoke a trusted function.",
+/** Parse and validate a 5-field cron. Day-of-week: 0=Sunday … 6=Saturday (7=Sunday accepted). */
+export function parseCron(expression: string): ParsedCron {
+  const fields = expression.trim().split(/\s+/);
+  if (fields.length !== 5) {
+    throw new TypeError(
+      `Cron \`${expression}\` must have exactly 5 fields (minute hour day-of-month month day-of-week).`,
     );
   }
-  if (definition.trusted === true && fn.authority !== "trusted") {
-    // Trusted flag unused — allowed; no escalation beyond the function's grant.
+  const dayOfWeek = parseCronField(fields[4]!, 0, 7, "day-of-week");
+  // Normalize 7 → 0 (Sunday).
+  if (dayOfWeek.has(7)) {
+    dayOfWeek.delete(7);
+    dayOfWeek.add(0);
   }
-  const data = await validateFunctionInput(
-    fn,
-    (definition.data ?? {}) as JsonObject,
-  );
-  const actorId = principal.type === "user" ? principal.id : `schedule:${scheduleName}`;
-  const groups = principal.type === "user"
-    ? await membershipsFor(env, appId, principal.id)
-    : [];
-  const context: ArmadilloFunctionContext = {
-    appId,
-    stage: env.ARMADILLO_STAGE?.trim() || "unknown",
-    functionName: definition.function,
-    data,
-    principal: {
-      type: principal.type === "user" ? "user" : "api_key",
-      id: principal.id,
-      name: principal.name,
-      scopes: Object.freeze(["schedule"]),
-    },
-    user: {
-      id: principal.type === "user" ? principal.id : actorId,
-      email: principal.email ?? "",
-      name: principal.name,
-    },
-    groups,
-    request: new Request(`https://schedule.local/v1/functions/${definition.function}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ data }),
-    }),
-    env: Object.freeze({}),
-    records: {
-      get: refusedAccess,
-      create: refusedAccess,
-      update: refusedAccess,
-      delete: refusedAccess,
-      query: refusedAccess,
-    },
-    get trusted() {
-      if (fn.authority !== "trusted" || definition.trusted !== true) {
-        throw new ArmadilloFunctionError(
-          403,
-          "FORBIDDEN",
-          "Raw capabilities require authority: trusted on the function and trusted: true on the schedule.",
-        );
-      }
-      return {
-        db: env.DB,
-        files: env.FILES,
-        get users() {
-          return {
-          create: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          requestMagicLink: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          resetPassword: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          rename: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-        };
-        },
-        records: trustedRecords(env, appId, backend, () => actorId),
-        groups: trustedGroups(env, appId),
-        readFile: (id: string, fileOptions?: { maxBytes?: number }) =>
-          readTrustedFile(env, appId, id, fileOptions),
-      };
-    },
-    get db() {
-      if (fn.authority !== "trusted" || definition.trusted !== true) {
-        throw new ArmadilloFunctionError(403, "FORBIDDEN", "Raw capabilities require authority: trusted.");
-      }
-      return env.DB;
-    },
-    files: {
-      get: refusedAccess,
-      delete: refusedAccess,
-    },
-    get users() {
-      return {
-          create: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          requestMagicLink: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          resetPassword: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-          rename: () => {
-            throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot administer users.");
-          },
-        };
-    },
-    emit: () => {
-      throw new ArmadilloFunctionError(403, "FORBIDDEN", "Scheduled runs cannot emit realtime events in Slice 1.");
-    },
-    logger: {
-      write(event) {
-        console.log(JSON.stringify({
-          timestamp: event.timestamp || new Date().toISOString(),
-          level: event.level,
-          event: event.event,
-          appId: event.appId ?? appId,
-          functionName: event.functionName ?? definition.function,
-          scheduleName,
-          actorId,
-        }));
-      },
-    },
-    log: (message, details = {}) => {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: "info",
-        event: message,
-        appId,
-        scheduleName,
-        attributes: details,
-      }));
-    },
-    get trace() {
-      return { traceId: "schedule", spanId: scheduleName };
-    },
-    span: async (_name, run) => run(),
+  return {
+    minute: parseCronField(fields[0]!, 0, 59, "minute"),
+    hour: parseCronField(fields[1]!, 0, 23, "hour"),
+    dayOfMonth: parseCronField(fields[2]!, 1, 31, "day-of-month"),
+    month: parseCronField(fields[3]!, 1, 12, "month"),
+    dayOfWeek,
   };
-  const timeoutMs = definition.timeoutMs ?? 30_000;
-  let timer: ReturnType<typeof setTimeout> | undefined;
+}
+
+function assertTimeZone(timeZone: string): void {
   try {
-    await Promise.race([
-      (async () => {
-        const result = await fn.handler(context, data);
-        await validateFunctionOutput(fn, result as JsonValue);
-      })(),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => {
-          reject(new ArmadilloFunctionError(504, "INTERNAL_ERROR", `Schedule run exceeded ${timeoutMs}ms.`));
-        }, timeoutMs);
-        timer.unref?.();
-      }),
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
+    new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+  } catch {
+    throw new TypeError(`Timezone \`${timeZone}\` is not a valid IANA time zone.`);
   }
 }
 
-async function finishRun(
-  env: ArmadilloEnv,
-  appId: string,
-  name: string,
-  definition: ScheduleDefinition,
-  runId: string,
-  attempt: number,
-  ok: boolean,
-  errorSummary: string | null,
-  timestamp: string,
-): Promise<void> {
-  const maxAttempts = definition.retry?.attempts ?? 1;
-  let outcome: "success" | "failure" | "timeout" | "dead" = ok ? "success" : "failure";
-  if (!ok && errorSummary?.includes("exceeded")) outcome = "timeout";
-  const retriesLeft = !ok && attempt < maxAttempts;
-  if (!ok && !retriesLeft) outcome = "dead";
+type ZonedParts = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  weekday: number; // 0=Sun
+};
 
-  await env.DB.prepare(
-    `UPDATE ${INTERNAL_TABLES.scheduleRuns}
-        SET outcome = ?1, finished_at = ?2, error_summary = ?3
-      WHERE app_id = ?4 AND id = ?5`,
-  ).bind(outcome, timestamp, errorSummary, appId, runId).run();
+const weekdayMap: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+};
 
-  const cron = parseCron(definition.cron);
-  const timeZone = definition.timezone ?? "UTC";
-  let nextDue: string;
-  let pendingAttempt: number;
-  if (retriesLeft) {
-    const delay = scheduleRetryDelay(definition.retry, attempt);
-    nextDue = new Date(Date.now() + delay).toISOString().replace(/\.\d{3}Z$/, "Z");
-    pendingAttempt = attempt + 1;
-  } else {
-    nextDue = nextCronUtc(Date.now() + 1, cron, timeZone);
-    pendingAttempt = 1;
-  }
-
-  await env.DB.prepare(
-    `UPDATE ${INTERNAL_TABLES.scheduleState}
-        SET running_at = NULL, running_run_id = NULL,
-            next_due_at = ?1, pending_attempt = ?2,
-            last_run_at = ?3, updated_at = ?3
-      WHERE app_id = ?4 AND schedule_name = ?5`,
-  ).bind(nextDue, pendingAttempt, timestamp, appId, name).run();
+export function zonedParts(date: Date, timeZone: string): ZonedParts {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+    weekday: "short",
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(date).map((p) => [p.type, p.value]));
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    second: Number(parts.second),
+    weekday: weekdayMap[parts.weekday!] ?? 0,
+  };
 }
 
 /**
- * Dispatch due user-defined schedules. Called from the maintenance sweep after
- * cleanup and webhook delivery so a noisy schedule cannot starve those first.
- * At most one start per schedule and MAX_STARTS_PER_SWEEP per sweep.
+ * Next UTC instant (minute-aligned) at or after `fromMs` whose wall-clock in
+ * `timeZone` matches `cron`. DST: skipped wall hours never match; repeated
+ * hours match the first UTC minute that shows that wall time (fire once).
  */
-export async function dispatchDueSchedules(
-  env: ArmadilloEnv,
-  backend: ArmadilloBackendDefinition = {},
-): Promise<{ started: number; skipped: number }> {
-  const schedules = backend.schedules ?? {};
-  const names = Object.keys(schedules);
-  if (names.length === 0) return { started: 0, skipped: 0 };
-
-  const appId = env.ARMADILLO_APP_ID?.trim() || "default";
-  const timestamp = now();
-  let started = 0;
-  let skipped = 0;
-
-  for (const name of names) {
-    if (started >= MAX_STARTS_PER_SWEEP) {
-      skipped += 1;
+export function nextCronUtc(fromMs: number, cron: ParsedCron, timeZone: string): string {
+  // Ceil to the next whole minute so we never re-fire the same minute.
+  let cursor = Math.ceil(fromMs / 60_000) * 60_000;
+  const limit = cursor + 366 * 24 * 60 * 60_000;
+  const minutes = [...cron.minute].sort((a, b) => a - b);
+  while (cursor <= limit) {
+    const parts = zonedParts(new Date(cursor), timeZone);
+    if (parts.second !== 0) {
+      cursor += (60 - parts.second) * 1_000;
       continue;
     }
-    const definition = schedules[name]!;
-    const fn = backend.functions?.[definition.function];
-    if (!fn) {
-      console.warn("Armadillo schedule references missing function", { schedule: name, function: definition.function });
-      skipped += 1;
+    if (!cron.month.has(parts.month) || !cron.dayOfMonth.has(parts.day) || !cron.dayOfWeek.has(parts.weekday)) {
+      // Jump to the next UTC hour boundary to cut work on sparse calendars.
+      cursor = Math.floor(cursor / 3_600_000) * 3_600_000 + 3_600_000;
       continue;
     }
-
-    try {
-      let state = await ensureState(env, appId, name, definition, timestamp);
-      state = await reapStaleLease(env, appId, name, state, definition, timestamp);
-
-      if (state.paused === 1) {
-        skipped += 1;
-        continue;
-      }
-      if (state.running_at) {
-        skipped += 1;
-        continue;
-      }
-      if (!state.next_due_at || state.next_due_at > timestamp) {
-        skipped += 1;
-        continue;
-      }
-
-      let principalType = "system";
-      let principalId = `schedule:${name}`;
-      let principalEmail: string | null = null;
-      let principalName: string | null = null;
-      if (definition.principal.type === "owner") {
-        const owner = await resolveOwner(env, appId);
-        if (!owner) {
-          const runId = makeId("srun");
-          await env.DB.prepare(
-            `INSERT INTO ${INTERNAL_TABLES.scheduleRuns}
-               (app_id, id, schedule_name, principal_type, principal_id, attempt, started_at, finished_at, outcome, error_summary, created_at)
-             VALUES (?1, ?2, ?3, 'system', ?4, ?5, ?6, ?6, 'failure', ?7, ?6)`,
-          ).bind(
-            appId, runId, name, principalId, state.pending_attempt || 1, timestamp,
-            "Owner principal unavailable; finish Burrow owner setup.",
-          ).run();
-          await finishRun(env, appId, name, definition, runId, state.pending_attempt || 1, false,
-            "Owner principal unavailable; finish Burrow owner setup.", timestamp);
-          started += 1;
-          continue;
-        }
-        principalType = "user";
-        principalId = owner.user_id;
-        principalEmail = owner.email;
-        principalName = owner.name;
-      }
-
-      const runId = await claimRun(env, appId, name, state, principalType, principalId, timestamp);
-      if (!runId) {
-        skipped += 1;
-        continue;
-      }
-      started += 1;
-      const attempt = state.pending_attempt || 1;
-      try {
-        await invokeScheduledFunction(env, appId, backend, name, definition, fn, {
-          type: principalType === "user" ? "user" : "system",
-          id: principalId,
-          name: principalName,
-          email: principalEmail,
-        });
-        await finishRun(env, appId, name, definition, runId, attempt, true, null, now());
-      } catch (error) {
-        await finishRun(
-          env, appId, name, definition, runId, attempt, false,
-          sanitizeScheduleError(error), now(),
-        );
-      }
-    } catch (error) {
-      console.warn("Armadillo schedule dispatch failed", {
-        schedule: name,
-        error: sanitizeScheduleError(error),
-      });
-      skipped += 1;
+    if (!cron.hour.has(parts.hour)) {
+      cursor = Math.floor(cursor / 3_600_000) * 3_600_000 + 3_600_000;
+      continue;
     }
+    if (!cron.minute.has(parts.minute)) {
+      const nextMin = minutes.find((m) => m > parts.minute);
+      if (nextMin === undefined) {
+        cursor = Math.floor(cursor / 3_600_000) * 3_600_000 + 3_600_000;
+      } else {
+        cursor += (nextMin - parts.minute) * 60_000;
+      }
+      continue;
+    }
+    return new Date(cursor).toISOString().replace(/\.\d{3}Z$/, "Z");
   }
-  return { started, skipped };
+  throw new TypeError("Cron expression does not match any time in the next year.");
 }
 
-/** Advance next_due_at into the past for tests / operator force. */
-export async function forceScheduleDue(
-  env: ArmadilloEnv,
-  appId: string,
-  scheduleName: string,
-): Promise<void> {
-  const timestamp = now();
-  const due = new Date(Date.now() - 1_000).toISOString();
-  await env.DB.prepare(
-    `UPDATE ${INTERNAL_TABLES.scheduleState}
-        SET next_due_at = ?1, updated_at = ?2
-      WHERE app_id = ?3 AND schedule_name = ?4`,
-  ).bind(due, timestamp, appId, scheduleName).run();
+export function scheduleRetryDelay(
+  retry: ScheduleRetryOptions | undefined,
+  attemptsSoFar: number,
+): number {
+  const initial = retry?.initialDelayMs ?? 1_000;
+  const backoff = retry?.backoff ?? "exponential";
+  const multiplier = backoff === "exponential" ? 2 ** Math.max(0, attemptsSoFar - 1) : 1;
+  return Math.min(initial * multiplier, 24 * 60 * 60 * 1_000);
+}
+
+export function validateScheduleDefinitions(
+  schedules: Record<string, ScheduleDefinition> | undefined,
+  functionNames: ReadonlySet<string>,
+): void {
+  if (schedules === undefined) return;
+  if (schedules === null || typeof schedules !== "object" || Array.isArray(schedules)) {
+    throw new TypeError("schedules must be an object when provided.");
+  }
+  for (const [name, definition] of Object.entries(schedules)) {
+    if (!NAME.test(name)) {
+      throw new TypeError(`Schedule name \`${name}\` is invalid.`);
+    }
+    if (!definition || typeof definition !== "object") {
+      throw new TypeError(`Schedule \`${name}\` must be an object.`);
+    }
+    if (typeof definition.function !== "string" || !NAME.test(definition.function)) {
+      throw new TypeError(`Schedule \`${name}\` needs a valid function name.`);
+    }
+    if (!functionNames.has(definition.function)) {
+      throw new TypeError(
+        `Schedule \`${name}\` references unknown function \`${definition.function}\`. Declare it in backend.functions.`,
+      );
+    }
+    parseCron(definition.cron);
+    const timeZone = definition.timezone ?? "UTC";
+    assertTimeZone(timeZone);
+    const principal = definition.principal;
+    if (
+      !principal
+      || typeof principal !== "object"
+      || (principal.type !== "system" && principal.type !== "owner")
+    ) {
+      throw new TypeError(
+        `Schedule \`${name}\` principal must be { type: "system" } or { type: "owner" }.`,
+      );
+    }
+    if (definition.trusted !== undefined && definition.trusted !== true && definition.trusted !== false) {
+      throw new TypeError(`Schedule \`${name}\` trusted must be a boolean when set.`);
+    }
+    if (definition.overlap !== undefined && definition.overlap !== "skip") {
+      throw new TypeError(`Schedule \`${name}\` overlap must be "skip" (Slice 1).`);
+    }
+    const timeout = definition.timeoutMs ?? 30_000;
+    if (!Number.isSafeInteger(timeout) || timeout < 1_000 || timeout > 300_000) {
+      throw new TypeError(`Schedule \`${name}\` timeoutMs must be from 1000 to 300000.`);
+    }
+    const attempts = definition.retry?.attempts ?? 1;
+    if (!Number.isSafeInteger(attempts) || attempts < 1 || attempts > 20) {
+      throw new TypeError(`Schedule \`${name}\` retry attempts must be from 1 to 20.`);
+    }
+    const delay = definition.retry?.initialDelayMs ?? 1_000;
+    if (!Number.isSafeInteger(delay) || delay < 1 || delay > 86_400_000) {
+      throw new TypeError(`Schedule \`${name}\` retry initialDelayMs must be from 1 to 86400000.`);
+    }
+    if (
+      definition.retry?.backoff !== undefined
+      && definition.retry.backoff !== "fixed"
+      && definition.retry.backoff !== "exponential"
+    ) {
+      throw new TypeError(`Schedule \`${name}\` retry backoff must be "fixed" or "exponential".`);
+    }
+    if (definition.data !== undefined) {
+      if (!definition.data || typeof definition.data !== "object" || Array.isArray(definition.data)) {
+        throw new TypeError(`Schedule \`${name}\` data must be a plain object when set.`);
+      }
+      try {
+        JSON.stringify(definition.data);
+      } catch {
+        throw new TypeError(`Schedule \`${name}\` data must be JSON-serializable.`);
+      }
+    }
+  }
+}
+
+/** Sanitize run error text: truncate and strip credential-shaped tokens. */
+export function sanitizeScheduleError(error: unknown, max = 200): string {
+  let message = error instanceof Error ? error.message : String(error);
+  message = message
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/\bsk-[A-Za-z0-9_-]{8,}\b/g, "[redacted]")
+    .replace(/(password|secret|token|credential)\s*[:=]\s*\S+/gi, "$1=[redacted]");
+  if (message.length > max) message = `${message.slice(0, max - 1)}…`;
+  return message || "Schedule run failed.";
 }

@@ -1,114 +1,101 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/29-Court/create-dillo/main/site/img/shell.webp" alt="Armadillo — Armored backend." width="400">
-</p>
+# dillo — the library
 
-<h1 align="center">DILLO</h1>
-<p align="center"><strong>Your backend, built to take a hit.</strong></p>
+Dillo is a library of typed primitives — auth, permissions,
+files, events, database access and a secrets vault — for people
+building signed-in apps and workflows on this stack. The legacy
+`create-dillo` studio package and its compiled dist are archived
+under `legacy/create-dillo/` inside this package (slice A10,
+2026-11-10): provenance only, never extended, excluded from the
+public face and from any sync set. Its TypeScript sources were
+recovered into `src/engine/` on 2026-11-10 and blob-verified
+against their source repo (see Proven).
 
-<p align="center">
-  Files, database, functions — described in three files,<br>
-  deployed to Cloudflare, armored by default.
-</p>
+## Install + example
 
-<p align="center">
-  <a href="https://dillo.29court.com">dillo.29court.com</a> •
-  <a href="https://hackthedillo.dev">hackthedillo.dev</a> •
-  <a href="https://github.com/29-Court/create-dillo">GitHub</a>
-</p>
+No dependencies. From this directory:
 
----
-
-## Install
-
-```bash
-npm init create-dillo@alpha
+```
+npm test          # the smoke + auth suites
+npm run build     # compiles src/auth/ to dist/auth/
 ```
 
-One command. Three files. Zero weeks spent wiring auth.
+The two re-homed primitives carry their own proofs, run from
+this directory: `node src/vault/test/proof.mjs` (the Vault,
+69/69) and `node src/mail/test/mail_proof.mjs` (mail, 45/45).
+The storage contract suite is `npm run test:offline` in
+`src/storage/` (35/35).
 
-## The three files
+The one example:
 
-**`schema.ts`** — what your data looks like. Who can touch it.
+- **cert-incident-command** — `examples/cert-incident-command/`:
+  an incident-command app built on this library (signed-in
+  roles, a versioned 29Court rule engine bundle judging voice
+  reports, state in the one database, credentials held in the
+  vault). Run it with `npm run battery` in that directory —
+  51/51 on 2026-11-10. Status: **candidate** — its legs are
+  proven locally and against the preview stack; it is not live.
 
-```ts
-import { boolean, owner, schema, string, table } from "create-dillo/schema";
+## Proven
 
-export default schema({
-  Project: table({
-    name: string().min(1).max(120),
-    active: boolean().default(true),
-  }).permissions({
-    view: owner,   // the armor: enforced on every request
-    edit: owner,
-  }),
-});
-```
+All counts measured 2026-11-10:
 
-**`backend.ts`** — what your app does. Functions, validated.
+- `npm test` in this directory — **40/40** (smoke + auth).
+- Storage contract suite, offline: `npm run test:offline` in
+  `src/storage/` — **35/35**.
+- `src/engine/` recovery: **113/113** files blob-verified
+  against the source repo; the record is
+  `src/engine/PROVENANCE.md`, with per-file hashes in
+  `src/engine/MANIFEST.json`.
+- The example battery above — **51/51**.
+- All four packages together: `bash scripts/test-packages.sh`
+  from the repo root — 4/4.
 
-```ts
-import { defineBackend, defineFunction } from "create-dillo/backend";
+## Status
 
-export default defineBackend({
-  schema,
-  functions: {
-    greet: defineFunction()
-      .input({ name: string().min(1) })
-      .output({ message: string() })
-      .handler((_ctx, input) => ({ message: `Hello ${input.name}` })),
-  },
-});
-```
+Real:
 
-**`armadillo.config.ts`** — where it runs. Your infrastructure.
+- `src/vault/` — the secrets vault (Worker `29court-vault`, service-
+  binding broker; secrets owned by a named user, AEAD-sealed at rest,
+  OAuth-as-primitive), built by the phase program's P1 and re-homed
+  here from the packages tree in slice A10 (2026-11-10). Package
+  proof 69/69 at this path.
+- `src/mail/` — the email primitive (render + 7 v1 templates,
+  outbox state machine, Cloudflare + HTTPS-ESP transports),
+  built by the phase program's P2 and re-homed here in slice
+  A10. Surfaces consume it by vendored byte-copy (the pin
+  shape); proof 45/45 at this path.
+- `src/auth/` — the one handoff verifier (`verifyHandoff`,
+  `requireMember`), built to `dist/auth/` and consumed by the
+  Photos surface. Semantics are the accounts issuer's: an
+  opaque one-time code, 120-second life, single use,
+  server-to-server exchange.
+- `src/storage/` — the typed storage port (a storage interface
+  plus D1, R2 and in-memory adapters, with its contract suite),
+  moved here in slice A3 (2026-11-10); the platform surface
+  consumes it from here.
+- `src/engine/` — the recovered `create-dillo` TypeScript
+  sources (113 files; see Proven).
+- `examples/cert-incident-command/` — the one example, at
+  candidate status.
+- `legacy/create-dillo/` — the archived studio package (app +
+  compiled dist + its permissions record and proof), re-homed
+  here in slice A10. Provenance only: never extended, excluded
+  from the public face and from any sync set.
+- This package definition (`package.json`), the sync manifest
+  and the license-pending note.
 
-```ts
-import { app } from "create-dillo/deploy/cloudflare";
-import backend from "./backend.ts";
+Absorbed: none outstanding — slice A10 completed the absorption
+(the vault, mail, and the legacy archive above).
 
-export default app({ id: "my-app", backend, signup: "open" });
-// Workers + D1 + R2, wired. Deploy when you're ready.
-```
+Missing:
 
-## Client — types flow to your UI
+- A live example — the one example is a candidate, proven
+  locally and on the preview stack, not live.
+- A license decision — pending, below.
 
-```ts
-import { createClient } from "create-dillo/client";
-import type { Project } from "./schema.ts";  // same types, shared
+## License + sync boundary
 
-const api = createClient({ baseUrl: "/api" });
-
-// Fully typed — Project comes straight from your schema.
-const projects: Project[] = await api.list("projects");
-const { message } = await api.functions.greet({ name: "Victor" });
-// Change the schema? The client breaks at build time, not runtime.
-```
-
-## What is a dillo?
-
-**A dillo is a box.** Your box. Everything your app needs to exist lives inside it — and every wall of the box can be swapped, expanded, or ripped out. Your call.
-
-- **Wall one: Files** — Powered by R2 by default. Uploads, storage, and access rules that respect the same permission words as everything else.
-- **Wall two: Database** — Powered by D1 by default. JSON records with real types flowing straight to your client.
-- **Wall three: Functions** — Your logic, at the edge. `defineFunction()` — validated inputs, typed outputs, callable straight from your UI.
-- **Wall four: Micro-apps** *(roadmap)* — AI-built apps living on top of your dillo.
-
-## The deal
-
-**We take the *entire* backend. You do whatever you want on the frontend.**
-
-- **Permissions:** The backend holds all the permissions. Every record, every file, every function call runs through the armor.
-- **Ownership:** Your data is yours. Private by default, on infrastructure you control.
-- **Responsibility:** Ship the dumb stuff. Break your own data? That's on you. But the backend will never be the thing that breaks first.
-- **Frontend:** No approval needed. For anything.
-
-## Proof of armor, courtesy of Texas
-
-In July 2015, a man in Marietta, Texas spotted an armadillo on his property at 3 a.m., took out a .38 revolver, and fired three times. **One of the bullets came back and hit him in the jaw.** He was airlifted to a hospital.
-
-> "We didn't find the armadillo."
-> — Sheriff Larry Rowe, Cass County, on the condition of the animal
-
-## License
-
-MIT. Built to take a hit.
+License: PENDING — see `LICENSE-PENDING.md`; the license is the
+owner's publishing decision. Sync boundary: this directory is
+synced to a public repo by its owner; private siblings are not
+part of it.

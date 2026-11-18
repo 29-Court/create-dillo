@@ -1,0 +1,43 @@
+# Dillo Vault — Worker `29court-vault` (service-binding broker, no route).
+# Local proof only. Live deploy is `python3 deploy.py` (deploy row drafted
+# in RUN.md; NOT deployed — no deploy in this program).
+name = "29court-vault"
+main = "worker.mjs"
+compatibility_date = "2024-09-23"
+# D-6: no public workers.dev route — the Vault is reachable ONLY through the
+# in-account service binding. A deploy that leaves the default hostname on
+# would expose every secret to the internet via forged headers.
+workers_dev = false
+
+# D1: the ONE physical `29court`. The database_id here is a LOCAL-ONLY
+# placeholder — miniflare (wrangler dev) builds the schema from the
+# migrations dir; deploy.py points the binding at the real D1 id.
+[[d1_databases]]
+binding = "DB"
+database_name = "29court"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# VAULT_KEK is a Secrets Store secret (`vault-master-kek`) BY REFERENCE —
+# its value is NEVER in this file. The binding below names the store + the
+# secret; the value lives only in the account Secrets Store. For local
+# proof the driver injects a throwaway KEK via `wrangler dev --var
+# VAULT_KEK:<random>`. Absent KEK ⇒ every call fails closed (worker.mjs).
+[[secrets_store_secrets]]
+binding = "VAULT_KEK"
+store_id = "8644fac9842a48999bb704b0416e5b4b"
+secret_name = "vault-master-kek"
+
+# VAULT_CONSOLE_SECRET is the owner's console caller secret BY REFERENCE —
+# its value is NEVER in this file. The console caller (x-vault-caller:
+# console) authenticates with this secret to mint grants (D-1b) and to
+# read the owner's own secrets (D-1a, via grants minted at connect time).
+# For local proof the driver injects a throwaway value via `wrangler dev
+# --var VAULT_CONSOLE_SECRET:<random>`.
+[[secrets_store_secrets]]
+binding = "VAULT_CONSOLE_SECRET"
+store_id = "8644fac9842a48999bb704b0416e5b4b"
+secret_name = "vault-console-secret"
+
+[vars]
+VAULT_TEST_DOUBLE = "0"

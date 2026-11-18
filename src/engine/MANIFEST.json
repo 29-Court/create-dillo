@@ -1,0 +1,582 @@
+{
+  "fetched": "2026-11-10",
+  "files": {
+    "dillo/src/engine/LICENSE": {
+      "blob_sha": "27e97ad8f5555f4e4e01074215ec01a689cd83b1",
+      "mode": "100644",
+      "source_path": "LICENSE"
+    },
+    "dillo/src/engine/access.ts": {
+      "blob_sha": "062db87e090cbe7cbeb6f112a41979a59e19cf63",
+      "mode": "100644",
+      "source_path": "src/access.ts"
+    },
+    "dillo/src/engine/agent-bridge/README.md": {
+      "blob_sha": "69d0375dc2a62017fab8b26524940b604cfb5d98",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/README.md"
+    },
+    "dillo/src/engine/agent-bridge/crypto.ts": {
+      "blob_sha": "b75bd4b6d496adf1d9b5a2d6ae8bafcc45c9ebb2",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/crypto.ts"
+    },
+    "dillo/src/engine/agent-bridge/http.ts": {
+      "blob_sha": "967b1f8f9e87070be645a5d00c7fb09749a9b569",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/http.ts"
+    },
+    "dillo/src/engine/agent-bridge/index.ts": {
+      "blob_sha": "ed607e88ca22c86e5d4843c79a1bd7548f139247",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/index.ts"
+    },
+    "dillo/src/engine/agent-bridge/local.ts": {
+      "blob_sha": "0405eabef0c54f91542d34211d588a2d021b2fe5",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/local.ts"
+    },
+    "dillo/src/engine/agent-bridge/store.ts": {
+      "blob_sha": "c329c020676d0a162704fa25a2971cff3fab5f5c",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/store.ts"
+    },
+    "dillo/src/engine/agent-bridge/types.ts": {
+      "blob_sha": "2350cab145b72b3411f4cf24238b526899816ce4",
+      "mode": "100644",
+      "source_path": "src/agent-bridge/types.ts"
+    },
+    "dillo/src/engine/backend.ts": {
+      "blob_sha": "95cd7753d684c3536e8785cb46eaba08f3aed33c",
+      "mode": "100644",
+      "source_path": "src/backend.ts"
+    },
+    "dillo/src/engine/browser.ts": {
+      "blob_sha": "6ffc99f1e79d4de9c85f463be4b88a4e2fc4bb3b",
+      "mode": "100644",
+      "source_path": "src/browser.ts"
+    },
+    "dillo/src/engine/build.d.ts": {
+      "blob_sha": "4a81d5c872335fda6dbc649ff7ae831e337aab19",
+      "mode": "100644",
+      "source_path": "src/build.d.ts"
+    },
+    "dillo/src/engine/cache.ts": {
+      "blob_sha": "a98fde6f9d158fe23b4aa8d131716b6daaf47a2d",
+      "mode": "100644",
+      "source_path": "src/cache.ts"
+    },
+    "dillo/src/engine/capabilities.ts": {
+      "blob_sha": "2e61ae298f9f62695ac8bf3d7aa160149c9b41cb",
+      "mode": "100644",
+      "source_path": "src/capabilities.ts"
+    },
+    "dillo/src/engine/cli/commands/backup.ts": {
+      "blob_sha": "9854a7ae4ca6baa7832ac43c166f49c2cceb8d68",
+      "mode": "100644",
+      "source_path": "src/cli/commands/backup.ts"
+    },
+    "dillo/src/engine/cli/commands/create.ts": {
+      "blob_sha": "f3b11fb35a717dc46d6223a78deef558477e8ae3",
+      "mode": "100644",
+      "source_path": "src/cli/commands/create.ts"
+    },
+    "dillo/src/engine/cli/commands/deploy.ts": {
+      "blob_sha": "61ea80b0bcdf1abb797a9272d6fd388eba14741c",
+      "mode": "100644",
+      "source_path": "src/cli/commands/deploy.ts"
+    },
+    "dillo/src/engine/cli/commands/dev.ts": {
+      "blob_sha": "3bc62e062f3ecef9f779ee2c6c88a8cca30d98b0",
+      "mode": "100644",
+      "source_path": "src/cli/commands/dev.ts"
+    },
+    "dillo/src/engine/cli/commands/doctor.ts": {
+      "blob_sha": "0804e98d70cb6ad04d73138aca6eae97073a8afc",
+      "mode": "100644",
+      "source_path": "src/cli/commands/doctor.ts"
+    },
+    "dillo/src/engine/cli/commands/init.ts": {
+      "blob_sha": "2c4d8cfa6daaf67c6f4cb10a0a91a17111fe7b67",
+      "mode": "100644",
+      "source_path": "src/cli/commands/init.ts"
+    },
+    "dillo/src/engine/cli/commands/plan.ts": {
+      "blob_sha": "4f34c03a43c23a5d09e72d93e1107fbe645c5b9f",
+      "mode": "100644",
+      "source_path": "src/cli/commands/plan.ts"
+    },
+    "dillo/src/engine/cli/commands/run.ts": {
+      "blob_sha": "d08b281799104bf41c2fb32ab782ae0896710f6f",
+      "mode": "100644",
+      "source_path": "src/cli/commands/run.ts"
+    },
+    "dillo/src/engine/cli/project.ts": {
+      "blob_sha": "31b1d0d009ce9c38a4536c1b7e7eddd30108420b",
+      "mode": "100644",
+      "source_path": "src/cli/project.ts"
+    },
+    "dillo/src/engine/cli/run-workflow.ts": {
+      "blob_sha": "b66b90c1cc767f981f6ebaba806ca9cb5acf4bf9",
+      "mode": "100644",
+      "source_path": "src/cli/run-workflow.ts"
+    },
+    "dillo/src/engine/client.ts": {
+      "blob_sha": "4cd0ed9a2ce9a4cbca4861d73bc69e16845ea7ab",
+      "mode": "100644",
+      "source_path": "src/client.ts"
+    },
+    "dillo/src/engine/cloudflare/index.ts": {
+      "blob_sha": "a1d6be2adfd1157966e5cdc1f32613928bd0e8ac",
+      "mode": "100644",
+      "source_path": "src/cloudflare/index.ts"
+    },
+    "dillo/src/engine/cloudflare/r2-presign.ts": {
+      "blob_sha": "335e783e34d91f98dfe09465c848107a6239e46f",
+      "mode": "100644",
+      "source_path": "src/cloudflare/r2-presign.ts"
+    },
+    "dillo/src/engine/cloudflare/realtime.ts": {
+      "blob_sha": "f65d9ee509a1ceece154e2eee9014abab3311c32",
+      "mode": "100644",
+      "source_path": "src/cloudflare/realtime.ts"
+    },
+    "dillo/src/engine/cloudflare/runtime.ts": {
+      "blob_sha": "7c4b10f9cd791f57f0b805e2515ae8ae3c04d6f9",
+      "mode": "100644",
+      "source_path": "src/cloudflare/runtime.ts"
+    },
+    "dillo/src/engine/computed.ts": {
+      "blob_sha": "946e8ebf933f0bab1527d5bbf9e924967e5f8a16",
+      "mode": "100644",
+      "source_path": "src/computed.ts"
+    },
+    "dillo/src/engine/deploy/cloudflare.ts": {
+      "blob_sha": "7a79921c925cd0b7ec21a9f3352c86cbed349ef9",
+      "mode": "100644",
+      "source_path": "src/deploy/cloudflare.ts"
+    },
+    "dillo/src/engine/discovery.ts": {
+      "blob_sha": "7f8ed892307acde0c6d63dc70a5e5ac0f63b4ebf",
+      "mode": "100644",
+      "source_path": "src/discovery.ts"
+    },
+    "dillo/src/engine/engine/api-keys.ts": {
+      "blob_sha": "4839d5ca11b3fd64541287d5ff4189140947da78",
+      "mode": "100644",
+      "source_path": "src/engine/api-keys.ts"
+    },
+    "dillo/src/engine/engine/apps.ts": {
+      "blob_sha": "2196a7352e1f86c5985f18529a43421db0960fc0",
+      "mode": "100644",
+      "source_path": "src/engine/apps.ts"
+    },
+    "dillo/src/engine/engine/auth.ts": {
+      "blob_sha": "24f501c26ffb609d7c06d48d10b7915615a61830",
+      "mode": "100644",
+      "source_path": "src/engine/auth.ts"
+    },
+    "dillo/src/engine/engine/auth/bootstrap.ts": {
+      "blob_sha": "86573ab7bf1211fc857cdd50aa6688d8721aec76",
+      "mode": "100644",
+      "source_path": "src/engine/auth/bootstrap.ts"
+    },
+    "dillo/src/engine/engine/auth/credentials.ts": {
+      "blob_sha": "21e6f9f4368a80ef7c161bd2b6661ac9f0c1fdd2",
+      "mode": "100644",
+      "source_path": "src/engine/auth/credentials.ts"
+    },
+    "dillo/src/engine/engine/auth/routes.ts": {
+      "blob_sha": "bc65f181ba8694bf4f809a69588677f2c461e7e7",
+      "mode": "100644",
+      "source_path": "src/engine/auth/routes.ts"
+    },
+    "dillo/src/engine/engine/auth/sessions.ts": {
+      "blob_sha": "6f54a68a40fde200892e58e52da8cfdb48b0c7e2",
+      "mode": "100644",
+      "source_path": "src/engine/auth/sessions.ts"
+    },
+    "dillo/src/engine/engine/body.ts": {
+      "blob_sha": "b39433274ad56c73419fee3315b49ba00a4c2cdd",
+      "mode": "100644",
+      "source_path": "src/engine/body.ts"
+    },
+    "dillo/src/engine/engine/bridge.ts": {
+      "blob_sha": "a6fdfe066ba81c6a3d09b9cd5d627510c61e6409",
+      "mode": "100644",
+      "source_path": "src/engine/bridge.ts"
+    },
+    "dillo/src/engine/engine/burrow-page.ts": {
+      "blob_sha": "e7775676afe4a575591fb9d4fe25e707d3cc577d",
+      "mode": "100644",
+      "source_path": "src/engine/burrow-page.ts"
+    },
+    "dillo/src/engine/engine/burrow-schedules.ts": {
+      "blob_sha": "9405758077b5f785c2197231df311c9c7bdcc698",
+      "mode": "100644",
+      "source_path": "src/engine/burrow-schedules.ts"
+    },
+    "dillo/src/engine/engine/burrow-usage.ts": {
+      "blob_sha": "625128bd5cf8aa49c4112b8032975b0ff94566cc",
+      "mode": "100644",
+      "source_path": "src/engine/burrow-usage.ts"
+    },
+    "dillo/src/engine/engine/burrow-webhooks.ts": {
+      "blob_sha": "bf23c97d0901043d970fb70ed8772ea5cffc5644",
+      "mode": "100644",
+      "source_path": "src/engine/burrow-webhooks.ts"
+    },
+    "dillo/src/engine/engine/burrow.ts": {
+      "blob_sha": "fbc8d37caf16cd09b40090d8822589246230460c",
+      "mode": "100644",
+      "source_path": "src/engine/burrow.ts"
+    },
+    "dillo/src/engine/engine/collectors.ts": {
+      "blob_sha": "ac007df2092076354aa45aea3a77cad31f1871a5",
+      "mode": "100644",
+      "source_path": "src/engine/collectors.ts"
+    },
+    "dillo/src/engine/engine/engine.ts": {
+      "blob_sha": "78bba89c821839cee4b3f6a5e18944c885a590d1",
+      "mode": "100644",
+      "source_path": "src/engine/engine.ts"
+    },
+    "dillo/src/engine/engine/environment.ts": {
+      "blob_sha": "123199048ff88989a205c9d4e91e0feef2814a1e",
+      "mode": "100644",
+      "source_path": "src/engine/environment.ts"
+    },
+    "dillo/src/engine/engine/events.ts": {
+      "blob_sha": "ee9eb2a2de698d5e9ef49466d286b263802c7941",
+      "mode": "100644",
+      "source_path": "src/engine/events.ts"
+    },
+    "dillo/src/engine/engine/files.ts": {
+      "blob_sha": "4f25bd15ec1f3a0e3a363927662cbc19f234a308",
+      "mode": "100644",
+      "source_path": "src/engine/files.ts"
+    },
+    "dillo/src/engine/engine/function-access.ts": {
+      "blob_sha": "54566bbccf4d5441c9a08b8df5729b6f4e0b4cbf",
+      "mode": "100644",
+      "source_path": "src/engine/function-access.ts"
+    },
+    "dillo/src/engine/engine/functions.ts": {
+      "blob_sha": "aa1423cffbb75fc0568e36263f8954fbf89d0897",
+      "mode": "100644",
+      "source_path": "src/engine/functions.ts"
+    },
+    "dillo/src/engine/engine/gdpr.ts": {
+      "blob_sha": "0af46586629985d017660d1f30d541e21c89e2c5",
+      "mode": "100644",
+      "source_path": "src/engine/gdpr.ts"
+    },
+    "dillo/src/engine/engine/group-projection.ts": {
+      "blob_sha": "92d346fba79371d83646c86d350bdf921559cefa",
+      "mode": "100644",
+      "source_path": "src/engine/group-projection.ts"
+    },
+    "dillo/src/engine/engine/handlers/webhooks.ts": {
+      "blob_sha": "c7900902f2eb4c69e2e9a2526b6aa24a7aefd618",
+      "mode": "100644",
+      "source_path": "src/engine/handlers/webhooks.ts"
+    },
+    "dillo/src/engine/engine/helpers/crypto.ts": {
+      "blob_sha": "fad512f5436e2c508cd2b4d9736d36e104dd966f",
+      "mode": "100644",
+      "source_path": "src/engine/helpers/crypto.ts"
+    },
+    "dillo/src/engine/engine/helpers/id.ts": {
+      "blob_sha": "2bc718b1a2b01c188e2db0078f1905d4377992db",
+      "mode": "100644",
+      "source_path": "src/engine/helpers/id.ts"
+    },
+    "dillo/src/engine/engine/helpers/json.ts": {
+      "blob_sha": "579d3b98c392e02cd812b90e727017f192027ead",
+      "mode": "100644",
+      "source_path": "src/engine/helpers/json.ts"
+    },
+    "dillo/src/engine/engine/http.ts": {
+      "blob_sha": "15c2c6c26eb54adbb742d43009540f2bdaf2386b",
+      "mode": "100644",
+      "source_path": "src/engine/http.ts"
+    },
+    "dillo/src/engine/engine/mail-queue.ts": {
+      "blob_sha": "990133fb61c75b2be403e411c34e0c27537d3877",
+      "mode": "100644",
+      "source_path": "src/engine/mail-queue.ts"
+    },
+    "dillo/src/engine/engine/mail.ts": {
+      "blob_sha": "4d42ec613841386a3ae724e1b46475578fe39f90",
+      "mode": "100644",
+      "source_path": "src/engine/mail.ts"
+    },
+    "dillo/src/engine/engine/maintenance.ts": {
+      "blob_sha": "7a2f02c8ec929e05f247e60bac3f58f5728b6f34",
+      "mode": "100644",
+      "source_path": "src/engine/maintenance.ts"
+    },
+    "dillo/src/engine/engine/middleware/database.ts": {
+      "blob_sha": "2a717904d62da6a3f66657623c46a595862e867b",
+      "mode": "100644",
+      "source_path": "src/engine/middleware/database.ts"
+    },
+    "dillo/src/engine/engine/middleware/rate-limit.ts": {
+      "blob_sha": "d50405ff871150df0be26f1ddd4d97b0ffc2f20a",
+      "mode": "100644",
+      "source_path": "src/engine/middleware/rate-limit.ts"
+    },
+    "dillo/src/engine/engine/oauth.ts": {
+      "blob_sha": "15f1ff5441043560295f47c11c40bb5fe8a9ad77",
+      "mode": "100644",
+      "source_path": "src/engine/oauth.ts"
+    },
+    "dillo/src/engine/engine/operation.ts": {
+      "blob_sha": "6726ec9f556f5a9f7d22c2ebe42c226b3e24c95e",
+      "mode": "100644",
+      "source_path": "src/engine/operation.ts"
+    },
+    "dillo/src/engine/engine/permissions.ts": {
+      "blob_sha": "db86ac68f6b8f37ef1002294ecc1e744fd1412e7",
+      "mode": "100644",
+      "source_path": "src/engine/permissions.ts"
+    },
+    "dillo/src/engine/engine/ports.ts": {
+      "blob_sha": "a0cf5410333ccbd236f03a4e01f19e71cf5d7d38",
+      "mode": "100644",
+      "source_path": "src/engine/ports.ts"
+    },
+    "dillo/src/engine/engine/queries.ts": {
+      "blob_sha": "2a3a88701fb1806809d2565699fcb1bb50c72931",
+      "mode": "100644",
+      "source_path": "src/engine/queries.ts"
+    },
+    "dillo/src/engine/engine/record-audit.ts": {
+      "blob_sha": "12e8ac00e75547acd16027e64b650fce79d607be",
+      "mode": "100644",
+      "source_path": "src/engine/record-audit.ts"
+    },
+    "dillo/src/engine/engine/records.ts": {
+      "blob_sha": "7c6a0d562ae9e1fbc707583028ab2915404df3d1",
+      "mode": "100644",
+      "source_path": "src/engine/records.ts"
+    },
+    "dillo/src/engine/engine/router.ts": {
+      "blob_sha": "2e41f1a8fff1225c00e7e7c800d4e7fc4bdb0b4c",
+      "mode": "100644",
+      "source_path": "src/engine/router.ts"
+    },
+    "dillo/src/engine/engine/routing.ts": {
+      "blob_sha": "917b910a29fbbb5de23f6066280775b49b291769",
+      "mode": "100644",
+      "source_path": "src/engine/routing.ts"
+    },
+    "dillo/src/engine/engine/runtime.ts": {
+      "blob_sha": "61a0d34ba3ce20101e056429b28e13324a779e7a",
+      "mode": "100644",
+      "source_path": "src/engine/runtime.ts"
+    },
+    "dillo/src/engine/engine/schedules.ts": {
+      "blob_sha": "f868fa48204fcb54588db098f6ab51450c5e986f",
+      "mode": "100644",
+      "source_path": "src/engine/schedules.ts"
+    },
+    "dillo/src/engine/engine/sessions.ts": {
+      "blob_sha": "94221626d54f4cc9560a65bfeac7e8ad5faa5f67",
+      "mode": "100644",
+      "source_path": "src/engine/sessions.ts"
+    },
+    "dillo/src/engine/engine/settings-page.ts": {
+      "blob_sha": "4ad8737531080980b5257a0e3848404e946c2398",
+      "mode": "100644",
+      "source_path": "src/engine/settings-page.ts"
+    },
+    "dillo/src/engine/engine/teams.ts": {
+      "blob_sha": "6456683d2796e6688b145e23d22f2786aa1bda5b",
+      "mode": "100644",
+      "source_path": "src/engine/teams.ts"
+    },
+    "dillo/src/engine/engine/ticket-inventory.ts": {
+      "blob_sha": "497c82ab6e234192aae9971dcc6fc02f424a012d",
+      "mode": "100644",
+      "source_path": "src/engine/ticket-inventory.ts"
+    },
+    "dillo/src/engine/engine/tickets.ts": {
+      "blob_sha": "7b72bc8141b67cab5f5b27e0cd75a3a003404eee",
+      "mode": "100644",
+      "source_path": "src/engine/tickets.ts"
+    },
+    "dillo/src/engine/engine/trusted-records.ts": {
+      "blob_sha": "1d4ec64353307f54236100579d05a57349855ede",
+      "mode": "100644",
+      "source_path": "src/engine/trusted-records.ts"
+    },
+    "dillo/src/engine/engine/ui-routing.ts": {
+      "blob_sha": "35ee05798d7dc865ce64b052cac48e400ff79c60",
+      "mode": "100644",
+      "source_path": "src/engine/ui-routing.ts"
+    },
+    "dillo/src/engine/engine/usage.ts": {
+      "blob_sha": "ea73356cbe9ef4769264b0e3155dc0fbe7ad86f5",
+      "mode": "100644",
+      "source_path": "src/engine/usage.ts"
+    },
+    "dillo/src/engine/engine/validation.ts": {
+      "blob_sha": "afd9516423c6c8e4d299c75255435cbd1fc3f069",
+      "mode": "100644",
+      "source_path": "src/engine/validation.ts"
+    },
+    "dillo/src/engine/engine/vouchers.ts": {
+      "blob_sha": "6b930468f0f743acf286c467430ea95db449605b",
+      "mode": "100644",
+      "source_path": "src/engine/vouchers.ts"
+    },
+    "dillo/src/engine/extensions.ts": {
+      "blob_sha": "6158edd81266a9cc4d41637cb06861087a319840",
+      "mode": "100644",
+      "source_path": "src/extensions.ts"
+    },
+    "dillo/src/engine/gdpr.ts": {
+      "blob_sha": "7ebe0f2d3dd146de731a75e83460617e41b7dda7",
+      "mode": "100644",
+      "source_path": "src/gdpr.ts"
+    },
+    "dillo/src/engine/geo.ts": {
+      "blob_sha": "8857d9f2e6b4ca3029dc8bea20b6a0514594a0b1",
+      "mode": "100644",
+      "source_path": "src/geo.ts"
+    },
+    "dillo/src/engine/index.ts": {
+      "blob_sha": "faa9c1c3097f1fd6327490f4ba320d4ce1552d73",
+      "mode": "100644",
+      "source_path": "src/index.ts"
+    },
+    "dillo/src/engine/internal-schema.ts": {
+      "blob_sha": "953ad87e7f1a7a1a9ba11586d826d86c295513a3",
+      "mode": "100644",
+      "source_path": "src/internal-schema.ts"
+    },
+    "dillo/src/engine/local/backup.ts": {
+      "blob_sha": "35978482b911421ebb54affba6566b2bf92d72b4",
+      "mode": "100644",
+      "source_path": "src/local/backup.ts"
+    },
+    "dillo/src/engine/local/bindings.ts": {
+      "blob_sha": "539a4daf0fcbf140d588a67bac8d3899e72ec675",
+      "mode": "100644",
+      "source_path": "src/local/bindings.ts"
+    },
+    "dillo/src/engine/local/index.ts": {
+      "blob_sha": "b6582c515247c5811d41c93e9d166c020328d26f",
+      "mode": "100644",
+      "source_path": "src/local/index.ts"
+    },
+    "dillo/src/engine/local/secret-store.ts": {
+      "blob_sha": "61bda2f166bb01db3362e2da9aa482fc4e7db771",
+      "mode": "100644",
+      "source_path": "src/local/secret-store.ts"
+    },
+    "dillo/src/engine/local/server.ts": {
+      "blob_sha": "dbe4b54b5c523108dfe3271168661d2f42451684",
+      "mode": "100644",
+      "source_path": "src/local/server.ts"
+    },
+    "dillo/src/engine/local/sqlite.ts": {
+      "blob_sha": "3c327a4537119be27799c1412a2199f46f27bb3e",
+      "mode": "100644",
+      "source_path": "src/local/sqlite.ts"
+    },
+    "dillo/src/engine/local/storage.ts": {
+      "blob_sha": "64cb93988e74987f3fcb541804d9dbb1d477364b",
+      "mode": "100644",
+      "source_path": "src/local/storage.ts"
+    },
+    "dillo/src/engine/middleware.ts": {
+      "blob_sha": "b90f788dd15783758c948454411eb95fec5b0025",
+      "mode": "100644",
+      "source_path": "src/middleware.ts"
+    },
+    "dillo/src/engine/migrations.ts": {
+      "blob_sha": "3bd79e608dc106a656f5545e1ce83319727f57dd",
+      "mode": "100644",
+      "source_path": "src/migrations.ts"
+    },
+    "dillo/src/engine/prompt-pack.ts": {
+      "blob_sha": "1342df3e2358511c6016186dd080abc24c11e210",
+      "mode": "100644",
+      "source_path": "src/prompt-pack.ts"
+    },
+    "dillo/src/engine/realtime-client.ts": {
+      "blob_sha": "df1115d5494ffeb0c8d36151ed0327988e965f05",
+      "mode": "100644",
+      "source_path": "src/realtime-client.ts"
+    },
+    "dillo/src/engine/realtime.ts": {
+      "blob_sha": "6d2620146a348d92d3050ccf301ee0bf304afa6a",
+      "mode": "100644",
+      "source_path": "src/realtime.ts"
+    },
+    "dillo/src/engine/requirements.ts": {
+      "blob_sha": "4326f4350b0e49168c1f0140aaf0ec7fc0c41ab8",
+      "mode": "100644",
+      "source_path": "src/requirements.ts"
+    },
+    "dillo/src/engine/runtime.ts": {
+      "blob_sha": "957e94d0cca71725419eb7d77c0fcc81a8803a6a",
+      "mode": "100644",
+      "source_path": "src/runtime.ts"
+    },
+    "dillo/src/engine/schedules.ts": {
+      "blob_sha": "28d81496bf94c3bf6082634e4ec2b04775eaf945",
+      "mode": "100644",
+      "source_path": "src/schedules.ts"
+    },
+    "dillo/src/engine/schema-migrations.ts": {
+      "blob_sha": "652ff90c3e75ad8398d80e6952415c71fcb70668",
+      "mode": "100644",
+      "source_path": "src/schema-migrations.ts"
+    },
+    "dillo/src/engine/schema.ts": {
+      "blob_sha": "af352a5f7ba925321748c76c81eb845602b54984",
+      "mode": "100644",
+      "source_path": "src/schema.ts"
+    },
+    "dillo/src/engine/testing.ts": {
+      "blob_sha": "65b05b1e4a2caa1ef185f1ff51e8e11d6fe7cc0b",
+      "mode": "100644",
+      "source_path": "src/testing.ts"
+    },
+    "dillo/src/engine/ui.ts": {
+      "blob_sha": "66b5dfe288ce43c00f21b6959c0e2dfcd59e8841",
+      "mode": "100644",
+      "source_path": "src/ui.ts"
+    },
+    "dillo/src/engine/ui/first-party.ts": {
+      "blob_sha": "cb281cdda4fdc62090300bdcffe1312f6d67cb3a",
+      "mode": "100644",
+      "source_path": "src/ui/first-party.ts"
+    },
+    "dillo/src/engine/usage-config.ts": {
+      "blob_sha": "bf66586900ba079f7bcb71fd1da1717baa9e08f5",
+      "mode": "100644",
+      "source_path": "src/usage-config.ts"
+    },
+    "dillo/src/engine/versions.ts": {
+      "blob_sha": "05580a5a3b82807ce3fa995d32360ad26cb75dd0",
+      "mode": "100644",
+      "source_path": "src/versions.ts"
+    },
+    "dillo/src/engine/webhooks.ts": {
+      "blob_sha": "e771cc4a745e190280a0383da9aa12830c2cc593",
+      "mode": "100644",
+      "source_path": "src/webhooks.ts"
+    }
+  },
+  "source_head": "ad47d1eb982e8b795c48b7d0a452580ef035a0d2",
+  "source_repo": "29-Court/create-dillo",
+  "source_root_files_checked_not_landed": {
+    "README.md": "a0236dd9145549726d5c79c5e9a4ad46a0683ee0",
+    "package.json": "8fe229d01d358c36a43befaffd1c02918f86b80f"
+  },
+  "source_tree": "bb3c39be87da5eaf6f7d4550774fbe46eaa2dc50"
+}

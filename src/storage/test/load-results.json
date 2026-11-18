@@ -1,0 +1,60 @@
+{
+  "ran_at": "2026-10-15T02:20:12.023Z",
+  "backend": "d1",
+  "database": "29court-platform-dev",
+  "chunk_bytes": 524288,
+  "transport": "D1 HTTP query API via bin/d1_bridge.py (BLOB params as int arrays)",
+  "largest_passing_mb": 32,
+  "first_failing_mb": null,
+  "results": [
+    {
+      "size_mb": 1,
+      "ok": true,
+      "put_s": 8.1,
+      "get_s": 3.5,
+      "error": null
+    },
+    {
+      "size_mb": 2,
+      "ok": true,
+      "put_s": 7.2,
+      "get_s": 3.9,
+      "error": null
+    },
+    {
+      "size_mb": 4,
+      "ok": true,
+      "put_s": 12.4,
+      "get_s": 7.2,
+      "error": null
+    },
+    {
+      "size_mb": 8,
+      "ok": true,
+      "put_s": 24.9,
+      "get_s": 17.1,
+      "error": null
+    },
+    {
+      "size_mb": 16,
+      "ok": true,
+      "put_s": 34.6,
+      "get_s": 27.5,
+      "error": null
+    },
+    {
+      "size_mb": 32,
+      "ok": true,
+      "put_s": 72.4,
+      "get_s": 73.1,
+      "error": null
+    },
+    {
+      "size_mb": 32,
+      "ok": true,
+      "put_s": 79.4,
+      "get_s": 73.2,
+      "error": null
+    }
+  ]
+}
